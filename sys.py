@@ -1,4 +1,5 @@
 
+from django.shortcuts import render
 from flask import *
 
 import pymysql
@@ -13,7 +14,7 @@ app.secret_key='!$F./rE$4T*_8.Vc#@f5'
 
 @app.route('/book',methods=['GET','POST'])
 def book():
-    if 'key' in session:
+    if 'phone' in session:
 
         conn = pymysql.connect(host='localhost',user='root',password='',database='sierra')
         cursor = conn.cursor()
@@ -24,20 +25,45 @@ def book():
             date = request.form['date']
             time = request.form['time']
             amount = request.form['amount']
+            phone=session['phone']
 
-            sql = 'insert into bookings(mwanzo,mwisho,date,time,amount)values(%s,%s,%s,%s,%s)'
-            cursor.execute(sql,(mwanzo,mwisho,date,time,amount))
+            sql = 'insert into bookings(mwanzo,mwisho,date,time,amount,phone)values(%s,%s,%s,%s,%s,%s)'
+            cursor.execute(sql,(mwanzo,mwisho,date,time,amount,phone))
             conn.commit()
             return render_template('booking.html', msg='Booking Reserved')
         else:
             return render_template('booking.html')
     else:
         return redirect('/login')
+
+@app.route('/checkout/<booking_id>')
+def checkout(booking_id):
+    if 'phone' in session:
+        conn = pymysql.connect(host='localhost',user='root',password='',database='sierra')
+        cursor = conn.cursor()
+        sql = 'delete from bookings where booking_id=%s'
+        cursor.execute(sql,(booking_id))
+        conn.commit()
+        # track
+       
+        return redirect('/viewbookings')
+    else:
+        return redirect('/login')
+
+
+
+
+
+
+
+
+
 @app.route('/signup',methods=['GET','POST'])
 def signup():
+    #Create a connection
     conn = pymysql.connect(host='localhost',user='root',password='',database='sierra')
     cursor = conn.cursor()
-
+    #If someone has posted something in the form
     if request.method == 'POST':
         names = request.form['names']
         email = request.form['email']
@@ -72,7 +98,9 @@ def login():
         if cursor.rowcount ==0:
             return render_template('login.html',msg='Invalid Credentials')
         else:
-            session['key']=phone
+            row = cursor.fetchone()
+            session['phone']=row[3]
+            
             return render_template('index.html')
     else:
         return render_template('login.html')
@@ -80,20 +108,21 @@ def login():
 
 @app.route('/')
 def index():
-    if 'key' in session:
+    if 'phone' in session:
          return render_template('index.html')
     else:
         return redirect('/login')
 
 @app.route('/viewbookings')
 def viewbookings():
-    if 'key' in session:
+    if 'phone' in session:
         
         conn = pymysql.connect(host='localhost',user='root',password='',database='sierra')
         cursor = conn.cursor()
+        session_key = session['phone']
 
-        sql = 'select * from bookings'
-        cursor.execute(sql)
+        sql = 'select * from bookings where phone=%s'
+        cursor.execute(sql,(session_key))
         if cursor.rowcount == 0:
             return render_template('viewbookings.html',msg='No Bookings Available')
         else:
@@ -103,25 +132,26 @@ def viewbookings():
         return redirect('/login')
 
 
+
 @app.route('/hire')
 def hire():
-    if 'key' in session:
-        
+    if 'phone' in session:
         conn = pymysql.connect(host='localhost',user='root',password='',database='sierra')
         cursor = conn.cursor()
-
-        sql = 'select * from cars'
+        sql = 'select * from cars where status="available"   '
         cursor.execute(sql)
         if cursor.rowcount == 0:
-            return render_template('hire.html',msg='No Cars Available')
+            return render_template('hire.html', msg='No cars available')
         else:
             rows=cursor.fetchall()
-            return render_template('hire.html',rows=rows)
+            return render_template('hire.html', rows=rows)
     else:
         return redirect('/login')
 
-import datetime
+
+
 import requests
+import datetime
 import base64
 from requests.auth import HTTPBasicAuth
 @app.route('/mpesa', methods = ['POST','GET'])
@@ -173,9 +203,31 @@ def mpesa():
 
             response = requests.post(url, json=payload, headers=headers)
             print (response.text)
-            return ('Please Complete Payment in Your Phone')
+            return ('Complete Your Payment On your Phone')
         else:
-            return redirect ('/hire')
+            return render_template('single.html')
+
+
+
+
+
+
+
+
+
+
+@app.route('/single/<reg>')
+def single(reg):
+    conn = pymysql.connect(host='localhost',user='root',password='',database='sierra')
+    cursor = conn.cursor()
+    sql='select * from cars where reg=%s'
+    cursor.execute(sql,(reg))
+    row = cursor.fetchone()
+    return render_template('single.html', row=row)
+
+
+
+
    
 
 
@@ -196,6 +248,7 @@ def save():
         return render_template('save1.html',msg='Saved successfully')
 
     else:
+        return render_template('hire.html')
         
         
 

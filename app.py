@@ -1,5 +1,8 @@
 
 from flask import *
+import joblib
+import pandas
+
 from flask import request
 app.secret_key = 'A+4#s_T%P8g0@o?6'
 
@@ -61,6 +64,40 @@ def book():
             return render_template('booking.html', msg = "Failed")
     else:
          return render_template('booking.html')
+
+
+@app.route('/model', methods=['GET', 'POST'])
+def model():
+    
+    # If a form is submitted
+    if request.method == "POST":
+        
+        # Unpickle classifier
+        clf = joblib.load("clf.pkl")
+        
+        # Get values through input bars
+        Flour = request.form.get("Flour")
+        Milk = request.form.get("Milk")
+        Sugar = request.form.get("Sugar")
+        Butter = request.form.get("Butter")
+        Egg = request.form.get("Egg")
+        BakingPowder= request.form.get("Baking Powder")
+        Vanilla = request.form.get("Vanilla")
+        Salt = request.form.get("Salt")
+
+        
+        # Put inputs to dataframe
+        X = pandas.DataFrame([[Flour, Milk,Sugar,Butter,Egg,BakingPowder,Vanilla,Salt]], columns = ["Flour", "Milk","Sugar","Butter","Egg","Baking Powder","Vanilla","Salt"])
+        
+        # Get prediction
+        prediction = clf.predict(X)[0]
+        
+    else:
+        prediction = ""
+        
+    return render_template("model.html", output = prediction)
+
+
 
 
 @app.route('/index', methods = ['GET','POST'])

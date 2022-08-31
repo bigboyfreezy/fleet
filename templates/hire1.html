@@ -11,6 +11,7 @@
   
 </head>
 <body>
+    
     <section class="row">
         <div class="col-md-12">
     
@@ -57,6 +58,41 @@
     
         </div>
         </section>
+        <br>
+        <hr>
+        <h3 class="text-center bg-primary text-success">HIRE A VEHICLE</h3>
+        <hr>
+        <br>
+        <section class="row container-fluid">
+
+            {%   for row in rows     %}
+            <div class="card col-md-4">
+                <img src="{{row[3]}}" class="card-img-top" alt="">
+                <div class="card-body text-center">
+                    <h5 class="card-title">  {{row[1]}}    </h5>
+                    <p class="card-text">{{row[0]}}</p>
+                    <p class="card-text text-muted">{{row[4]}}</p>
+                    <p class="card-text">{{row[5]}}</p>
+                    <button class="btn btn-success" href="/single/{{row[0]}}">PROCEED TO CART</button>
+
+
+
+                </div>&nbsp;&nbsp;
+
+
+
+            </div>
+            {% endfor %}
+
+
+
+
+
+        </section>
     
+
+<div class="modal fade" id="exampleModal"  aria-labelledby="exampleModalLabel" aria-hidden="true">
+    
+</div>
 </body>
 </html>

@@ -81,9 +81,10 @@
     <h2 class="text-center" style="font-family:'Times New Roman', Times, serif; font-weight:bolder; color:red;">{{msg}}</h2>
 
     {% for row in rows %}
+    <!-- for one fruit in fruits hat it will do it will display ne row after another as it loops because its a for loop it will execute  -->
     <div class="col-md-4">
         <div class="card shadow p-3">
-           
+          
             <div class="card-body ">
                 <h4>BOOKING ID:{{row[0]}} </h4>
                 <p>FROM: {{row[1]}}</p>
@@ -91,7 +92,7 @@
                 <P>TIME: {{row[3]}}</P>
                 <P>DATE:{{row[4]}}</P>
                 <P>AMOUNT:{{row[5]}}</P>
-                <a href="/single/{{row[5]}}"></a>
+                <a href="/checkout/{{row[0]}}" class="btn btn-danger">CHECKOUT</a>
             </div>
            
         </div>
